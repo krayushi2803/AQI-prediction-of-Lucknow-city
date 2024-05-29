@@ -1,15 +1,15 @@
-# Air Quality Index (AQI) Prediction README
+# Air Quality Index Prediction README
 
 ## Overview
 
-This project involves predicting the Air Quality Index (AQI) using various machine learning models. The dataset contains several pollutants' concentration levels, which are used to calculate the AQI. We implemented and compared the performance of different regression models, including Decision Tree Regressor, Random Forest Regressor, Support Vector Regressor, and Extra Trees Regressor.
+This project focuses on predicting the Air Quality Index (AQI) using various regression models. The AQI is calculated based on pollutant concentrations, and the models used for prediction include Decision Tree Regressor, Random Forest Regressor, Support Vector Regressor, and Extra Trees Regressor. The dataset is sourced from the Central Pollution Control Board (CPCB).
 
 ## Dataset
 
-The dataset used for this project is sourced from the Central Pollution Control Board (CPCB).
+The dataset contains pollutant concentrations for various air quality parameters including PM2.5, PM10, NO2, O3, CO, and SO2. These concentrations are used to calculate the AQI.
 
 ### Source
-- [CPCB](https://cpcb.nic.in/)
+- Central Pollution Control Board (CPCB)
 
 ## Dependencies
 
@@ -19,82 +19,77 @@ Ensure you have the following dependencies installed:
 pip install numpy pandas scikit-learn matplotlib
 ```
 
-## Data Preprocessing
+## Project Steps
 
-### Handling Missing Values
-The dataset had missing values, which were filled with zeros for simplicity.
+### 1. Data Preparation
 
-### One-Hot Encoding
-One-Hot Encoding was used for categorical variables to convert them into numerical values suitable for machine learning models.
+- Load the dataset and fill missing values with zero.
+- Define breakpoints for each pollutant to calculate the sub-indices and the overall AQI.
 
-## Breakpoints for AQI Calculation
+### 2. AQI Calculation
 
-The AQI is calculated based on concentration breakpoints for various pollutants as defined by regulatory authorities. The breakpoints for different pollutants are:
+Calculate the AQI based on the pollutant concentrations using predefined breakpoints.
 
-- **CO**: (0-50), (51-100), (101-200), (201-300), (301-400), (401-500)
-- **NO2**: (0-50), (51-100), (101-200), (201-300), (301-400), (401-500)
-- **O3**: (0-50), (51-100), (101-200), (201-300), (301-400), (401-500)
-- **SO2**: (0-50), (51-100), (101-200), (201-300), (301-400), (401-500)
-- **PM2.5**: (0-50), (51-100), (101-200), (201-300), (301-400), (401-500)
-- **PM10**: (0-50), (51-100), (101-200), (201-300), (301-400), (401-500)
+### 3. Data Splitting
 
-## Models Implemented
+Split the data into training and testing sets.
 
-### 1. Decision Tree Regressor (DTR)
-### 2. Random Forest Regressor (RFR)
-### 3. Support Vector Regressor (SVR)
-### 4. Extra Trees Regressor (ET)
+### 4. One-Hot Encoding
 
-## Evaluation Metrics
+Apply One-Hot Encoding to the categorical features.
 
-The models were evaluated using the following metrics:
-- **R² Score**: Coefficient of determination
-- **RMSE**: Root Mean Squared Error
+### 5. Model Training and Evaluation
 
-## Results
+Train and evaluate the following models:
+- **Decision Tree Regressor**
+- **Random Forest Regressor**
+- **Support Vector Regressor**
+- **Extra Trees Regressor**
 
-### R² Values
-- **DTR**: 0.9981
-- **RFR**: 0.9783
-- **SVR**: 0.9865
-- **ET**: 0.9993
+### 6. Performance Metrics
 
-### RMSE Values
-- **DTR**: 4.7549
-- **RFR**: 16.0834
-- **SVR**: 12.6770
-- **ET**: 2.9420
+Evaluate model performance using RMSE and R² scores.
 
-## Visualization
+### 7. Visualization
 
-The results of the predictions and the comparison of R² and RMSE values for different models were visualized using matplotlib.
+Visualize the actual vs predicted AQI and compare model performances.
 
 ## Code
+
+### Importing Libraries
 
 ```python
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import PolynomialFeatures, StandardScaler, OneHotEncoder
+from sklearn.preprocessing import PolynomialFeatures
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import SVR
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import StandardScaler
 from math import sqrt
+from sklearn import metrics
+from sklearn.preprocessing import OneHotEncoder
 import matplotlib.pyplot as plt
+```
 
-# Load and preprocess data
+### Loading and Preparing Data
+
+```python
 df = pd.read_csv("Testing data.csv")
 df = df.fillna(0)
+df.to_csv('edited_data.csv', index=False)
 
-# Define breakpoints for AQI calculation
-co_breakpoints = [(0, 1, 0, 50), (1.01, 2, 51, 100), (2.01, 10, 101, 200), (10.01, 17, 201, 300), (17.01, 34, 301, 400), (34.01, 999999, 401, 500)]
-no2_breakpoints = [(0, 40, 0, 50), (41, 80, 51, 100), (81, 180, 101, 200), (181, 280, 201, 300), (281, 400, 301, 400), (401, 999999, 401, 500)]
-o3_breakpoints = [(0, 50, 0, 50), (51, 100, 51, 100), (101, 168, 101, 200), (169, 208, 201, 300), (209, 748, 301, 400), (749, 999999, 401, 500)]
-so2_breakpoints = [(0, 40, 0, 50), (41, 80, 51, 100), (81, 380, 101, 200), (381, 800, 201, 300), (801, 1600, 301, 400), (1601, 999999, 401, 500)]
-pm25_breakpoints = [(0, 30, 0, 50), (31, 60, 51, 100), (61, 90, 101, 200), (91, 120, 201, 300), (121, 250, 301, 400), (251, 999999, 401, 500)]
-pm10_breakpoints = [(0, 50, 0, 50), (51, 100, 51, 100), (101, 250, 101, 200), (251, 350, 201, 300), (351, 430, 301, 400), (431, 999999, 401, 500)]
+co_breakpoints = [
+    (0, 1, 0, 50), (1.01, 2, 51, 100), (2.01, 10, 101, 200),
+    (10.01, 17, 201, 300), (17.01, 34, 301, 400), (34.01, 999999, 401, 500)
+]
+# (similarly for no2_breakpoints, o3_breakpoints, so2_breakpoints, pm25_breakpoints, pm10_breakpoints)
+```
 
+### AQI Calculation Functions
+
+```python
 def calculate_sub_index(concentration, breakpoints):
     for (low_conc, high_conc, low_index, high_index) in breakpoints:
         if low_conc <= concentration <= high_conc:
@@ -106,19 +101,18 @@ def calculate_aqi(row):
     row['pm10_sub_index'] = calculate_sub_index(row['pm10'], pm10_breakpoints)
     row['no2_sub_index'] = calculate_sub_index(row['no2'], no2_breakpoints)
     row['o3_sub_index'] = calculate_sub_index(row['ozone'], o3_breakpoints)
-    row['co_sub_index'] = calculate_sub_index(row['co']*1/1000, co_breakpoints)  # Convert from µg/m³ to mg/m³
+    row['co_sub_index'] = calculate_sub_index(row['co'] * 1 / 1000, co_breakpoints)
     row['so2_sub_index'] = calculate_sub_index(row['so2'], so2_breakpoints)
-    aqi = max(row['pm2_5_sub_index'], row['pm10_sub_index'], row['no2_sub_index'], row['o3_sub_index'], row['co_sub_index'], row['so2_sub_index'])
+    aqi = max(row['pm2_5_sub_index'], row['pm10_sub_index'], row['no2_sub_index'],
+              row['o3_sub_index'], row['co_sub_index'], row['so2_sub_index'])
     return round(aqi)
 
-df['pm2_5_aqi'] = df['pm2_5'].apply(lambda x: calculate_sub_index(x, pm25_breakpoints))
-df['pm10_sub_aqi'] = df['pm10'].apply(lambda x: calculate_sub_index(x, pm10_breakpoints))
-df['no2_sub_aqi'] = df['no2'].apply(lambda x: calculate_sub_index(x, no2_breakpoints))
-df['o3_sub_aqi'] = df['ozone'].apply(lambda x: calculate_sub_index(x, o3_breakpoints))
-df['co_sub_aqi'] = df['co'].apply(lambda x: calculate_sub_index(x*1/1000, co_breakpoints))
-df['so2_sub_aqi'] = df['so2'].apply(lambda x: calculate_sub_index(x, so2_breakpoints))
 df['AQI'] = df.apply(calculate_aqi, axis=1)
+```
 
+### Splitting and Encoding Data
+
+```python
 x1 = df.iloc[:, 7:14].values
 y1 = df.iloc[:, 14:15].values
 
@@ -127,7 +121,11 @@ x_new1 = pd.DataFrame(ohe.fit_transform(x1[:, [0]]).toarray())
 feature_set = pd.concat([x_new1, pd.DataFrame(x1[:, 1:14])], axis=1, sort=False)
 
 x_train, x_test, y_train, y_test = train_test_split(feature_set, y1, test_size=0.25, random_state=100)
+```
 
+### Model Training and Evaluation
+
+```python
 # Decision Tree Regressor
 dec_tree = DecisionTreeRegressor(random_state=13)
 dec_tree.fit(x_train, y_train)
@@ -140,9 +138,77 @@ rt_reg = RandomForestRegressor(n_estimators=1000, random_state=12)
 rt_reg.fit(x_train, y_train)
 rt_y_predict = rt_reg.predict(x_test)
 rmse_rt = sqrt(mean_squared_error(y_test, rt_y_predict))
-r2_rt = r2_score(y_test, rt_y_predict)
+r2_rt = metrics.r2_score(y_test, rt_y_predict)
 
 # Support Vector Regressor
 sc_x = StandardScaler()
 sc_y = StandardScaler()
-x_train_s
+x_train_svr = sc_x.fit_transform(x_train)
+y_train_svr = sc_y.fit_transform(y_train.reshape(-1, 1)).ravel()
+svr_reg = SVR(kernel='rbf')
+svr_reg.fit(x_train_svr, y_train_svr)
+svr_y_predict = sc_y.inverse_transform(svr_reg.predict(sc_x.transform(x_test)).reshape(1, -1))
+rmse_svr = sqrt(mean_squared_error(y_test, svr_y_predict.T))
+r2_svr = metrics.r2_score(y_test, svr_y_predict.T)
+
+# Extra Trees Regressor
+et_regressor = ExtraTreesRegressor(n_estimators=100, random_state=15)
+et_regressor.fit(x_train, y_train)
+y_pred_et = et_regressor.predict(x_test)
+rmse_et = sqrt(mean_squared_error(y_test, y_pred_et))
+r2_et = r2_score(y_test, y_pred_et)
+```
+
+### Performance Metrics
+
+```python
+print("Error Metrics for Test data (DT):\n rmse_dt: {rmse_dt} \n r2_dt: {r2_dt}")
+print("Error Metrics for Test data:\n rmse_rt: {rmse_rt} \n r2_rt: {r2_rt}")
+print("Error Metrics for Test data:\n rmse_svr: {rmse_svr} \n r2_svr: {r2_svr}")
+print("Error Metrics for Test data:\n rmse_svr: {rmse_et} \n r2_svr: {r2_et}")
+
+print("evaluating on testing data:")
+print("----------------------------------------")
+print("models\tR^2\tRMSE")
+print("DTR\t{0:.4f}\t{1:.4f}".format(r2_dt, rmse_dt))
+print("RFR\t{0:.4f}\t{1:.4f}".format(r2_rt, rmse_rt))
+print("SVR\t{0:.4f}\t{1:.4f}".format(r2_svr, rmse_svr))
+print("ET\t{0:.4f}\t{1:.4f}".format(r2_et, rmse_et))
+```
+
+### Visualization
+
+```python
+plt.figure(figsize=(6, 4))
+plt.scatter(range(len(y_test)), y_test, c='black', marker='+', label='Actual AQI')
+plt.scatter(range(len(dt_y_predict)), dt_y_predict, c='pink', marker='x', label='Predicted AQI')
+plt.xlabel('Actual AQI')
+plt.ylabel('Predicted AQI')
+plt.title('Decision Tree Prediction Results in Testing')
+plt.legend()
+plt.show()
+
+# (Repeat similar code for Random Forest Regressor, Support Vector Regressor, Extra Trees Regressor)
+
+models = ['DTR', 'RFR', 'SVR', 'ET']
+r2_values = [0.9981, 0.9783, 0.9865, 0.9993]
+colors = ['pink', 'pink', 'pink', 'pink', 'pink']
+
+plt.figure(figsize=(6, 4))
+plt.bar(models, r2_values, color=colors, width=0.2)
+plt.xlabel('Models')
+plt.ylabel('R^2 Value')
+plt.title('Comparison of R^2 Values for Different Models in Testing Data')
+plt.ylim(0, 1.1)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.show()
+
+rmse_values = [4.7549, 16.0834, 12.6770, 2.9420]
+
+plt.figure(figsize=(6, 4))
+plt.bar(models, rmse_values, color=colors, width=0.2)
+plt.xlabel('Models')
+plt.ylabel('RMSE Value')
+plt.title('Comparison of RMSE Values for Different Models in Testing Data')
+plt.ylim(0, 15)
+plt.grid(axis='y',
